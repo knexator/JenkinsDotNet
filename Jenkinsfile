@@ -8,9 +8,22 @@ pipeline {
                 bat "git clone https://github.com/knexator/JenkinsDotNet.git ."
             }
         }
+        stage('Build') {
+            steps {
+                bat "dotnet build --configuration Release --no-restore"
+            }
+        }
         stage ('Tests') {
             steps {
-                bat "dotnet test --configuration Release --logger trx --results-directory TestResults"
+                bat "dotnet test --configuration Release --no-build --logger trx --results-directory TestResults"
+            }
+        }
+        stage('Publish') {
+            steps {
+                bat """
+                    dotnet publish --configuration Release --no-build --output "Publish" --framework net6.0
+                """
+                archiveArtifacts artifacts: 'Publish/*/', fingerprint: true
             }
         }
     }
